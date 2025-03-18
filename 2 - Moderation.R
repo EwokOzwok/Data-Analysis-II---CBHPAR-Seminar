@@ -175,6 +175,7 @@ mcar_test(data)
 # List-wise deletion or Multiple Imputation appropriate
 data <- na.omit(data)
 
+write.csv(data, "data/data_clean.csv", row.names = F)
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  ~ View Descriptives  ----
@@ -191,6 +192,7 @@ hist(data$phq9_total, main = "PHQ-9 Scores")
 hist(data$GPA, main = "GPA")
 hist(data$Alc30D, main = "Alc30D")
 hist(data$Gender_Male, main = "Gender\n(M = 1; F = 0)")    
+
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##                                                                            --
 ##-------------------------------- MODERATION-----------------------------------
@@ -198,7 +200,7 @@ hist(data$Gender_Male, main = "Gender\n(M = 1; F = 0)")
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # 1. nominal predictor and nominal moderator 
-data$abstainer <- ifelse(data$Alc30D<10, 1, -1)
+data$abstainer <- ifelse(data$Alc30D == 0, 1, -1)
 
 # nested model comparisons
 fit_rest<-lm(phq9_total ~ abstainer + Gender_Male, data=data)
@@ -221,22 +223,10 @@ plot_model(fit_full, type = "int")
 
 
 # 2. continuous predictor and nominal moderator 
+data$diener_mean_centered <- scale(data$diener_mean, scale = F, center = T)
+data$diener_mean_centered <- as.numeric(data$diener_mean_centered)
 
-
-# run SLR for Females
-
-fit_female <- lm(phq9_total ~ diener_mean, data=data, subset=(Gender_Male == 0))
-summary(fit_female)
-summary.aov(fit_female)
-
-# run SLR for Males
-
-fit_male <- lm(phq9_total~ diener_mean, data=data, subset=(Gender_Male == 1))
-summary(fit_male)
-summary.aov(fit_male)
-
-
-fit_rest <- lm(phq9_total ~ diener_mean + Gender_Male, data = data)
+fit_rest <- lm(phq9_total ~ diener_mean_centered + Gender_Male, data = data)
 summary(fit_rest)
 
 vif(fit_rest)
@@ -244,12 +234,11 @@ vif(fit_rest)
 
 # moderator full - CENTERED and dummy coded
 
-data$diener_mean_centered <- scale(data$diener_mean, scale = F, center = T)
-data$diener_mean_centered <- as.numeric(data$diener_mean_centered)
+
 
 fit_full <- lm(phq9_total ~ diener_mean_centered + Gender_Male + (diener_mean_centered*Gender_Male), data=data)
 
-vif(fit_full, type = 'predictor')
+vif(fit_full)
 summary(fit_full)
 # coef(summary(fit_full))
 
@@ -258,7 +247,7 @@ plot_model(fit_full, type = "int")
 
 
 
-# 3 - moderation with continuous predictor centered, moderator effects coded
+# 3 - moderation with continuous predictor and continuous moderator (both mean-centered)
 data$Alc30D_centered <- scale(data$Alc30D, scale = F, center = T)
 data$Alc30D_centered <- as.numeric(data$Alc30D_centered)
 fit_rest <- lm(phq9_total ~ diener_mean_centered + Alc30D_centered, data=data )
@@ -278,14 +267,6 @@ library(psych)
 describe(data$Alc30D)
 library(sjPlot)
 plot_model(fit_full1, type = "pred", terms = c("diener_mean_centered", "Alc30D_centered"))
-
-
-
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##                                                                            --
-##--------------------------------- MEDIATION-----------------------------------
-##                                                                            --
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
