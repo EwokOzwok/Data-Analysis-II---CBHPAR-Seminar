@@ -137,7 +137,7 @@ OR <- exp(-0.49818)
 OR
 1-OR
 # Because missingness in AUDIT_total scores is predicted by past month alcohol use 
-# (i.e., For every 1 additional day of past alcohol use the odds of missing audit_total go down by 39.23%)
+# (i.e., For every 1 additional day of past alcohol use the odds of missing AUDIT_total decrease by approximately 39.22%)
 # We can impute using Multiple Imputation
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -198,6 +198,7 @@ hist(data$Gender_Male, main = "Gender\n(M = 1; F = 0)")
 ##-------------------------------- MODERATION-----------------------------------
 ##                                                                            --
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 # 1. nominal predictor and nominal moderator 
 data$abstainer <- ifelse(data$Alc30D == 0, 1, -1)
