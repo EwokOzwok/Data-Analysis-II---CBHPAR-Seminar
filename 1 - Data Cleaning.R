@@ -135,7 +135,7 @@ hist(df$age)
 df<-dplyr::select(df, -BirthYear, -BirthMonth)
 
 # Reorganize to make age the 3rd variable
-df <- select(df, 1:2, age, everything())
+df <- dplyr::select(df, 1:2, age, everything())
 
 ##~~~~~~~~~~~~~~~~~~
 ##  ~ Hispanic  ----
@@ -185,7 +185,7 @@ table(df$missing_ethnicity)
 
 
 # Reorganize to make the missing_ethnicity the 15rd variable
-df <- select(df, 1:14, missing_ethnicity, everything())
+df <- dplyr::select(df, 1:14, missing_ethnicity, everything())
 
 
 ### Step 4: Repeat for Race ###
@@ -202,7 +202,7 @@ for(i in 1:nrow(df)){
 
 table(df$missing_race)
 
-df <- select(df, 1:32, missing_race, everything())
+df <- dplyr::select(df, 1:32, missing_race, everything())
 
 colnames(df)
 
@@ -251,7 +251,7 @@ rm(gender_var_list, i, gend)
 colnames(df)
 df<-dplyr::select(df, -Gender)
 
-df <- select(df, 1:3, Gender_Male, Gender_Female, Gender_Transgender, Gender_Nonbinary, Gender_Other, everything())
+df <- dplyr::select(df, 1:3, Gender_Male, Gender_Female, Gender_Transgender, Gender_Nonbinary, Gender_Other, everything())
 
 
 
@@ -291,7 +291,7 @@ rm(tg_var_list, tg_col)
 # Clean up and Reorganize variable list
 df<-dplyr::select(df, -Transgender)
 colnames(df)
-df <- select(df, 1:9, Transgender_M2F, Transgender_F2M, Transgender_NonConforming, everything())
+df <- dplyr::select(df, 1:9, Transgender_M2F, Transgender_F2M, Transgender_NonConforming, everything())
 
 
 
@@ -322,7 +322,7 @@ rm(sex_or_cols, col, i)
 
 # reorganize columns
 colnames(df)
-df <- select(df, 1:52, missing_sexual_orientation, everything())
+df <- dplyr::select(df, 1:52, missing_sexual_orientation, everything())
 
 
 

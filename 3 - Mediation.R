@@ -1,23 +1,12 @@
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##                  ART of R - Organizational Headings Tool                 ----
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# install.packages("ARTofR") # Install only once
-library(ARTofR)
-ARTofR::xxx_title1('Mediation')
-ARTofR::xxx_title3('Structural Equation Modeling (SEM)')
-# ARTofR::xxx_title3('MAR')
-# ARTofR::xxx_title3('MNAR')
-
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##                                                                            --
 ##--------------------------- INITIAL DATA CLEANING-----------------------------
 ##                                                                            --
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 source("1 - Data Cleaning.R")
-
+par(mfrow=c(1,1))
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##                                                                            --
 ##----------------------- SELECT VARIABLES OF INTEREST--------------------------
@@ -101,7 +90,6 @@ data_backup <- data
 
 # Clean up data to remove individual items
 data<-dplyr::select(data_backup, Gender_Male, GPA, Alc30D, audit_total, phq9_total, diener_mean)
-
 
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -191,91 +179,146 @@ hist(data$diener_mean, main = "Flourishing Scores")
 hist(data$phq9_total, main = "PHQ-9 Scores")
 hist(data$GPA, main = "GPA")
 hist(data$Alc30D, main = "Alc30D")
-hist(data$Gender_Male, main = "Gender\n(M = 1; F = 0)")    
+hist(data$Gender_Male, main = "Gender\n(M = 1; F = 0)")
+
+
+
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##                                                                            --
-##-------------------------------- MODERATION-----------------------------------
+##--------------------------------- MEDIATION-----------------------------------
 ##                                                                            --
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-# 1. nominal predictor and nominal moderator 
-data$abstainer <- ifelse(data$Alc30D == 0, 1, -1)
+# Install packages once (if not already installed)
 
-# nested model comparisons
-fit_rest<-lm(phq9_total ~ abstainer + Gender_Male, data=data)
+# install.packages("car")
+# install.packages("dplyr")
+# install.packages("psych")
+# install.packages("MASS")
+# install.packages("ltm")
+# install.packages("lavaan")
+# install.packages("semPlot")
+# install.packages("semhelpinghands")
+# install.packages("moments")
 
-# moderation with two nominal variables
-fit_full <- lm(phq9_total ~ abstainer + Gender_Male + (abstainer*Gender_Male), data=data)
-
-
-summary(fit_rest)
-
-summary(fit_full)
-
-anova(fit_rest, fit_full)
-
-
-# install.packages("sjPlot")
-library(sjPlot)
-plot_model(fit_full, type = "pred", terms = c("abstainer", "Gender_Male"))
-plot_model(fit_full, type = "int")
-
-
-
-# 2. continuous predictor and nominal moderator 
-data$diener_mean_centered <- scale(data$diener_mean, scale = F, center = T)
-data$diener_mean_centered <- as.numeric(data$diener_mean_centered)
-
-fit_rest <- lm(phq9_total ~ diener_mean_centered + Gender_Male, data = data)
-summary(fit_rest)
-
-vif(fit_rest)
-
-
-# moderator full - CENTERED and dummy coded
-
-
-
-fit_full <- lm(phq9_total ~ diener_mean_centered + Gender_Male + (diener_mean_centered*Gender_Male), data=data)
-
-anova(fit_rest, fit_full)
-
-
-vif(fit_full)
-
-summary(fit_full)
-# coef(summary(fit_full))
-
-
-plot_model(fit_full, type = "int")
-
-
-
-# 3 - moderation with continuous predictor and continuous moderator (both mean-centered)
-data$Alc30D_centered <- scale(data$Alc30D, scale = F, center = T)
-data$Alc30D_centered <- as.numeric(data$Alc30D_centered)
-fit_rest <- lm(phq9_total ~ diener_mean_centered + Alc30D_centered, data=data )
-vif(fit_rest)
-
-summary(fit_rest)
-  
-fit_full1 <- lm(phq9_total ~ diener_mean_centered + Alc30D_centered + diener_mean_centered*Alc30D_centered, data=data )
-vif(fit_full1)
-
-summary(fit_full1)
-summary.aov(fit_full1)
-
-# model comparison
-anova(fit_full1, fit_rest)
+# Load libraries
+library(car)
+library(dplyr)
 library(psych)
-describe(data$Alc30D)
-library(sjPlot)
-plot_model(fit_full1, type = "pred", terms = c("diener_mean_centered", "Alc30D_centered"))
+library(MASS)
+library(ltm)
+library(lavaan)
+library(semPlot)
+library(semhelpinghands)
+library(moments)
+
+# Mean-center all variables
+
+data$diener_mean_mc <- scale(data$diener_mean, scale = F, center = T)
+data$Alc30D_mc <- scale(data$Alc30D, scale = F, center = T)
+data$audit_total_mc <- scale(data$audit_total, scale = F, center = T)
+
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~ Structural Equation Modeling (SEM)  ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+model <- '
+    ## Structural Model ##
+    phq9_total ~ c_direct*Alc30D_mc
+    phq9_total ~ b*audit_total_mc 
+    audit_total_mc ~ a*Alc30D_mc
+
+    ## Mediation Effects ##
+    
+    # Indirect Effect (a*b)
+    indirect := a*b
+
+    # Direct Effect
+    direct := c_direct
+    
+    # Total Effect
+    total := c_direct + (a*b)
+'
+
+fit <- sem(model,
+           data = data,
+           se = "bootstrap",
+           bootstrap = 5000,
+           parallel = "snow",
+           ncpus = 23,
+           iseed = 8888)
+
+# Some errors will pop up, this is ok as long as the number of failed iterations is not very high (i.e., not > 1000)
+# If errors exceed 500-1000, it suggests your model is not converging well and may need respecification or to examinet he data for errors in cleaning
+# The models that failed to converge will not be used in computing the CIs
+
+summary(fit, fit.measures=T, standardized = T) # We cannot interpret this!
 
 
 
 
+# Examine Distribution of Bootstrap Results to determine which CI's to interpret
 
 
+bootstrap_results <- fit@boot
+bootstrap_results$coef
+coef_vector <- as.vector(bootstrap_results$coef)
+length(coef_vector)
+coef_vector <- na.omit(coef_vector)
+
+par(mfrow=c(1,1))
+hist(coef_vector, main = "Bootstrap Estimates Distribution", xlab = "Estimate", col = "lightblue")
+
+# QQ plot
+qqnorm(coef_vector)
+qqline(coef_vector, col = "red")
+
+# Check for skewness and kurtosis of the bootstrap estimates
+skewness(coef_vector)
+kurtosis(coef_vector)
+
+# Kolmogorov-Smirnov (KS) test for normality
+# Null hypothesis: "The data follow a normal distribution"
+# Alt. hypothesis: "The data do not follow a normal distribution"
+ks_test_result <- ks.test(coef_vector, "pnorm", mean(coef_vector), sd(coef_vector))
+print(ks_test_result)
+
+
+
+# Generate the standardized solution with delta-method confidence intervals (Assumes Normality of bootstrapped estimates) 
+
+# Delta-Method Confidence Intervals
+# Based on Taylor series approximations, assuming the parameter estimates follow a normal distribution.
+# 
+# Uses the asymptotic variance-covariance matrix of the parameter estimates.
+# 
+# Often faster to compute but relies on assumptions about the underlying distribution.
+# 
+# Can be inaccurate if the sampling distribution is skewed or non-normal.
+
+standardizedSolution(fit) # This is inaccurate because the sampling distribution of our bootstrap estimates is not normal
+
+# Generate bootstrap percentile confidence intervals for the standardized solution (No normality assumption)
+
+# Bootstrap Percentile Confidence Intervals
+# A non-parametric approach that does not assume normality.
+# 
+# Resamples the data multiple times (e.g., 5,000 bootstrap samples) and computes the parameter of interest in each resampled dataset.
+# 
+# The percentile method takes the lower and upper percentiles (e.g., 2.5th and 97.5th) from the bootstrap distribution to form the confidence interval.
+# 
+# More robust, especially when the parameter estimates are non-normally distributed, but computationally intensive.
+
+ci_boot <- standardizedSolution_boot_ci(fit)
+print(ci_boot, output = "text")
+summary(fit, fit.measures=T, standardized = T, rsquare=T) # We cannot interpret this!
+
+
+semPaths(fit, "std", fade=F, residuals = F, layout = "tree", rotation =2, 
+         edge.label.cex = 1.2, edge.label.position = .6, nCharNodes = 5)
