@@ -4,9 +4,9 @@
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # install.packages("ARTofR") # Install only once
-library(ARTofR)
-ARTofR::xxx_title1('Mediation')
-ARTofR::xxx_title3('Structural Equation Modeling (SEM)')
+# library(ARTofR)
+# ARTofR::xxx_title1('Mediation')
+# ARTofR::xxx_title3('Structural Equation Modeling (SEM)')
 # ARTofR::xxx_title3('MAR')
 # ARTofR::xxx_title3('MNAR')
 
@@ -191,7 +191,7 @@ hist(data$diener_mean, main = "Flourishing Scores")
 hist(data$phq9_total, main = "PHQ-9 Scores")
 hist(data$GPA, main = "GPA")
 hist(data$Alc30D, main = "Alc30D")
-hist(data$Gender_Male, main = "Gender\n(M = 1; F = 0)")    
+hist(data$Gender_Male, main = "Gender\n(F = 0; M = 1)")    
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##                                                                            --
