@@ -198,7 +198,8 @@ hist(data$Gender_Male, main = "Gender\n(F = 0; M = 1)")
 ##-------------------------------- MODERATION-----------------------------------
 ##                                                                            --
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+# install.packages("emmeans")
+library(emmeans)
 
 # 1. nominal predictor and nominal moderator 
 data$abstainer <- ifelse(data$Alc30D == 0, 1, -1)
@@ -211,16 +212,26 @@ fit_full <- lm(phq9_total ~ abstainer + Gender_Male + (abstainer*Gender_Male), d
 
 
 summary(fit_rest)
-
 summary(fit_full)
-
 anova(fit_rest, fit_full)
+lm.beta::lm.beta(fit_full)
 
 
 # install.packages("sjPlot")
 library(sjPlot)
 plot_model(fit_full, type = "pred", terms = c("abstainer", "Gender_Male"))
 plot_model(fit_full, type = "int")
+
+
+# Compute simple slopes
+simple_slopes <- emtrends(fit_full, 
+                          specs = "Gender_Male", 
+                          var = "abstainer")
+
+# Print results
+summary(simple_slopes, conf.int = TRUE)
+
+
 
 
 
@@ -239,18 +250,22 @@ vif(fit_rest)
 
 
 fit_full <- lm(phq9_total ~ diener_mean_centered + Gender_Male + (diener_mean_centered*Gender_Male), data=data)
-
-anova(fit_rest, fit_full)
-
-
 vif(fit_full)
 
+
 summary(fit_full)
-# coef(summary(fit_full))
-
-
+anova(fit_rest, fit_full)
+lm.beta::lm.beta(fit_full)
+x
 plot_model(fit_full, type = "int")
 
+# Compute simple slopes
+simple_slopes <- emtrends(fit_full, 
+                          specs = "diener_mean_centered", 
+                          var = "Gender_Male")
+
+# Print results
+summary(simple_slopes, conf.int = TRUE)
 
 
 # 3 - moderation with continuous predictor and continuous moderator (both mean-centered)

@@ -77,14 +77,14 @@ GRAPH/SCATTERPLOT=
 
 * 2. continuous (mean-centered) predictor and nominal moderator.
 
-AGGREGATE 
-  /OUTFILE=* MODE=ADDVARIABLES 
-  /BREAK= 
-  /AVG_diener_mean 'Average of diener_mean'=MEAN(diener_mean).
-Execute.
+*AGGREGATE 
+*  /OUTFILE=* MODE=ADDVARIABLES 
+*  /BREAK= 
+*  /AVG_diener_mean 'Average of diener_mean'=MEAN(diener_mean).
+*Execute.
 
-COMPUTE diener_mean_mc = diener_mean - AVG_diener_mean.
-Execute.
+*COMPUTE diener_mean_mc = diener_mean - AVG_diener_mean.
+*Execute.
 
 DATA LIST FREE/ 
    diener_m   Gender_M   phq9_tot   . 
@@ -102,14 +102,14 @@ GRAPH/SCATTERPLOT=
 
 *  3 - moderation with continuous predictor and continuous moderator (both mean-centered).
 
-AGGREGATE 
-  /OUTFILE=* MODE=ADDVARIABLES 
-  /BREAK= 
-  /AVG_Alc30D 'Average of Alc30D'=MEAN(Alc30D).
-Execute.
+*AGGREGATE 
+ * /OUTFILE=* MODE=ADDVARIABLES 
+  */BREAK= 
+ * /AVG_Alc30D 'Average of Alc30D'=MEAN(Alc30D).
+* Execute.
 
-COMPUTE Alc30D_mc = Alc30D - AVG_Alc30D.
-Execute.
+*COMPUTE Alc30D_mc = Alc30D - AVG_Alc30D.
+*Execute.
 
 
 DATA LIST FREE/ 
@@ -127,3 +127,6 @@ BEGIN DATA.
 END DATA. 
 GRAPH/SCATTERPLOT= 
  diener_m WITH     phq9_tot BY       Alc30D_m .
+
+
+
