@@ -33,7 +33,6 @@ head(data)
 colnames(data)[4] <- "Alc30D"
 colnames(data)
 # Keep only rows where gender is either male or female
-
 data$remove<-ifelse(data$Gender_Female == 0 & data$Gender_Male==0,1,0)
 
 table(data$remove)
@@ -220,7 +219,7 @@ lm.beta::lm.beta(fit_full)
 # install.packages("sjPlot")
 library(sjPlot)
 plot_model(fit_full, type = "pred", terms = c("abstainer", "Gender_Male"))
-plot_model(fit_full, type = "int")
+# plot_model(fit_full, type = "int")
 
 
 # Compute simple slopes
@@ -256,13 +255,13 @@ vif(fit_full)
 summary(fit_full)
 anova(fit_rest, fit_full)
 lm.beta::lm.beta(fit_full)
-x
+
 plot_model(fit_full, type = "int")
 
 # Compute simple slopes
 simple_slopes <- emtrends(fit_full, 
-                          specs = "diener_mean_centered", 
-                          var = "Gender_Male")
+                          specs = "Gender_Male", 
+                          var = "diener_mean_centered")
 
 # Print results
 summary(simple_slopes, conf.int = TRUE)
