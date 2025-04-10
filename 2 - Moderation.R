@@ -32,7 +32,10 @@ data<-df[,c(4,5,75,99,283:291,295:304,347:354)]
 head(data)
 colnames(data)[4] <- "Alc30D"
 colnames(data)
+
 # Keep only rows where gender is either male or female
+
+# Method 1: ifelse()
 data$remove<-ifelse(data$Gender_Female == 0 & data$Gender_Male==0,1,0)
 
 table(data$remove)
@@ -40,6 +43,10 @@ table(data$remove)
 data <- data[data$remove == 0, ]
 
 data<-dplyr::select(data,-remove)
+
+# Method 2: Row Selection
+data <- data[data$Gender_Female != 0 | data$Gender_Male != 0,]
+
 
 str(data)
 
@@ -213,8 +220,8 @@ fit_full <- lm(phq9_total ~ abstainer + Gender_Male + (abstainer*Gender_Male), d
 summary(fit_rest)
 summary(fit_full)
 anova(fit_rest, fit_full)
+confint.lm(fit_full)
 lm.beta::lm.beta(fit_full)
-
 
 # install.packages("sjPlot")
 library(sjPlot)
