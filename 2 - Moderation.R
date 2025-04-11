@@ -277,7 +277,6 @@ simple_slopes <- emtrends(fit_full,
 # Print results
 summary(simple_slopes, conf.int = TRUE)
 
-library(sjPlot)
 
 
 # 3 - moderation with continuous predictor and continuous moderator (both mean-centered)

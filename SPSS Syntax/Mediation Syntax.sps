@@ -61,30 +61,37 @@ EXECUTE.
 
 
 
-AGGREGATE 
-  /OUTFILE=* MODE=ADDVARIABLES 
-  /BREAK= 
-  /AVG_diener_mean 'Average of diener_mean'=MEAN(diener_mean).
-Execute.
+*AGGREGATE 
+ * /OUTFILE=* MODE=ADDVARIABLES 
+ * /BREAK= 
+ * /AVG_diener_mean 'Average of diener_mean'=MEAN(diener_mean).
+* Execute.
 
-COMPUTE diener_mean_mc = diener_mean - AVG_diener_mean.
-Execute.
+* COMPUTE diener_mean_mc = diener_mean - AVG_diener_mean.
+* Execute.
 
 
-AGGREGATE 
-  /OUTFILE=* MODE=ADDVARIABLES 
-  /BREAK= 
-  /AVG_Alc30D 'Average of Alc30D'=MEAN(Alc30D).
-Execute.
+* AGGREGATE 
+ * /OUTFILE=* MODE=ADDVARIABLES 
+ * /BREAK= 
+ * /AVG_Alc30D 'Average of Alc30D'=MEAN(Alc30D).
+* Execute.
 
-COMPUTE Alc30D_mc = Alc30D - AVG_Alc30D.
-Execute.
+* COMPUTE Alc30D_mc = Alc30D - AVG_Alc30D.
+* Execute.
 
-AGGREGATE 
-  /OUTFILE=* MODE=ADDVARIABLES 
-  /BREAK= 
-  /AVG_audit_total 'Average of audit_total'=MEAN(audit_total).
-Execute.
+*AGGREGATE 
+ * /OUTFILE=* MODE=ADDVARIABLES 
+ * /BREAK= 
+ * /AVG_audit_total 'Average of audit_total'=MEAN(audit_total).
+*Execute.
 
-COMPUTE AUDIT_mc = audit_total - AVG_audit_total.
-Execute.
+*COMPUTE AUDIT_mc = audit_total - AVG_audit_total.
+*Execute.
+
+
+
+
+
+
+
