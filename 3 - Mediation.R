@@ -226,6 +226,8 @@ data$audit_total_mc <- scale(data$audit_total, scale = F, center = T)
 ##  ~ Structural Equation Modeling (SEM)  ----
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+library(car)
+vif(lm(phq9_total ~ Alc30D_mc + audit_total_mc, data = data))
 
 
 model <- '
@@ -258,7 +260,7 @@ fit <- sem(model,
 # If errors exceed 500-1000, it suggests your model is not converging well and may need respecification or to examinet he data for errors in cleaning
 # The models that failed to converge will not be used in computing the CIs
 
-summary(fit, fit.measures=T, standardized = T) # We cannot interpret this!
+# summary(fit, fit.measures=T, standardized = T) # We cannot interpret this!
 
 
 
@@ -280,8 +282,8 @@ qqnorm(coef_vector)
 qqline(coef_vector, col = "red")
 
 # Check for skewness and kurtosis of the bootstrap estimates
-skewness(coef_vector)
-kurtosis(coef_vector)
+describe(coef_vector)
+
 
 # Kolmogorov-Smirnov (KS) test for normality
 # Null hypothesis: "The data follow a normal distribution"
@@ -317,8 +319,65 @@ standardizedSolution(fit) # This is inaccurate because the sampling distribution
 
 ci_boot <- standardizedSolution_boot_ci(fit)
 print(ci_boot, output = "text")
-summary(fit, fit.measures=T, standardized = T, rsquare=T) # We cannot interpret this!
+summary(fit, fit.measures=T, standardized = T, rsquare=T) # We cannot interpret coefficients from this output!
 
 
 semPaths(fit, "std", fade=F, residuals = F, layout = "tree", rotation =2, 
          edge.label.cex = 1.2, edge.label.position = .6, nCharNodes = 5)
+
+
+
+# Suppression -------------------------------------------------------------
+# Our model is exhibiting some suppression, which requires us to dig deeper before trusting our results... 
+
+# How do we know suppression is taking place?
+
+# 1.) The direction of the indirect effect (+) is the opposite sign as the direct effect (-)
+# 2.) The direct effect is STRONGER (-) than the total effect
+
+
+
+# How do we know the suppression is not problematic (i.e., not biasing our results)
+
+
+# 1.) Suppression may be problematic IF the direct effect without a mediator present is significant, but non-sig when the mediator is added
+
+sup_fit <- lm(phq9_total ~ Alc30D, data)
+summary(sup_fit)
+
+# However, our direct effect is non-sig, and ALSO marginally negative! This is a good sign
+
+# 2.) Suppression may simply be an artifact of the predictor and mediator being highly correlated (multicollinearity)
+
+vif(lm(phq9_total ~ Alc30D_mc + audit_total_mc, data = data))
+# However, we examined our VIF and found very acceptable values! This is a good sign!
+
+
+# Suppression is most problematic (biasing conlcusions) when...
+# The direct effect without the mediator and with the mediator change signs
+# The direct effect without the mediator is significant, but non-significant when the mediator is added
+
+# Another way to test for problematic suppression is examining Akaike's An Information Criterion (AIC) and Bayesian Information criterion (BIC)
+# Descriptive evaluation of model fit (−2log-likelihood + k*n_parameters) or k=log(n)
+
+# The smaller the AIC or BIC, the better the fit.
+
+# If the direct effect ONLY model has a lower BIC (better fit), then the suppression may be problematic, biasing your results.
+full_model <- lm(phq9_total ~ Alc30D_mc + audit_total_mc, data = data)
+de_model <- lm(phq9_total ~ Alc30D_mc, data = data)
+
+AIC(full_model, de_model) # more sensitive to changes in fit (better for testing suppression)
+BIC(full_model, de_model) # more stringently penalizes complex models, less valuable for testing suppression in small sample sizes
+
+
+# Given that we don't appear to have problematic, we have to use theory to make sense of the suppression...
+
+
+
+# This could indicate that individuals with higher AUDIT scores (i.e., more severe alcohol-related problems) 
+# are experiencing more depressive symptoms, which overshadows any protective or suppressive effect of recent alcohol use alone.
+
+
+
+
+

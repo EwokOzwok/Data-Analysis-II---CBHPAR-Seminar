@@ -210,16 +210,19 @@ library(emmeans)
 # 1. nominal predictor and nominal moderator 
 data$abstainer <- ifelse(data$Alc30D == 0, 1, -1)
 
+
 # nested model comparisons
-fit_rest<-lm(phq9_total ~ abstainer + Gender_Male, data=data)
+fit_rest <- lm(phq9_total ~ abstainer + Gender_Male, data=data)
+summary(fit_rest)
+
 
 # moderation with two nominal variables
 fit_full <- lm(phq9_total ~ abstainer + Gender_Male + (abstainer*Gender_Male), data=data)
 
-
-summary(fit_rest)
-summary(fit_full)
 anova(fit_rest, fit_full)
+
+
+summary(fit_full)
 confint.lm(fit_full)
 lm.beta::lm.beta(fit_full)
 
@@ -229,13 +232,13 @@ plot_model(fit_full, type = "pred", terms = c("abstainer", "Gender_Male"))
 # plot_model(fit_full, type = "int")
 
 
-# Compute simple slopes
-simple_slopes <- emtrends(fit_full, 
-                          specs = "Gender_Male", 
-                          var = "abstainer")
-
-# Print results
-summary(simple_slopes, conf.int = TRUE)
+# # Compute simple slopes
+# simple_slopes <- emtrends(fit_full, 
+#                           specs = "Gender_Male", 
+#                           var = "abstainer")
+# 
+# # Print results
+# summary(simple_slopes, conf.int = TRUE)
 
 
 
@@ -260,6 +263,7 @@ vif(fit_full)
 
 
 summary(fit_full)
+confint.lm(fit_full)
 anova(fit_rest, fit_full)
 lm.beta::lm.beta(fit_full)
 
@@ -272,6 +276,8 @@ simple_slopes <- emtrends(fit_full,
 
 # Print results
 summary(simple_slopes, conf.int = TRUE)
+
+library(sjPlot)
 
 
 # 3 - moderation with continuous predictor and continuous moderator (both mean-centered)
@@ -296,7 +302,13 @@ library(sjPlot)
 plot_model(fit_full1, type = "pred", terms = c("diener_mean_centered", "Alc30D_centered"))
 
 
+# Compute simple slopes
+simple_slopes <- emtrends(fit_full, 
+                          specs = "Alc30D_centered", 
+                          var = "diener_mean_centered")
 
+# Print results
+summary(simple_slopes, conf.int = TRUE)
 
 
 
