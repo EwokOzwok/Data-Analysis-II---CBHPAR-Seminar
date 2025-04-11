@@ -357,7 +357,7 @@ vif(lm(phq9_total ~ Alc30D_mc + audit_total_mc, data = data))
 # The direct effect without the mediator and with the mediator change signs
 # The direct effect without the mediator is significant, but non-significant when the mediator is added
 
-# Another way to test for problematic suppression is examining Akaike's An Information Criterion (AIC) and Bayesian Information criterion (BIC)
+# Another way to test for problematic suppression is examining Akaike's Information Criterion (AIC) and Bayesian Information criterion (BIC)
 # Descriptive evaluation of model fit (−2log-likelihood + k*n_parameters) or k=log(n)
 
 # The smaller the AIC or BIC, the better the fit.
