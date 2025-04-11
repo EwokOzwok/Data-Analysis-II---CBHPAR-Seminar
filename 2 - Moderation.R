@@ -215,7 +215,6 @@ data$abstainer <- ifelse(data$Alc30D == 0, 1, -1)
 fit_rest <- lm(phq9_total ~ abstainer + Gender_Male, data=data)
 summary(fit_rest)
 
-
 # moderation with two nominal variables
 fit_full <- lm(phq9_total ~ abstainer + Gender_Male + (abstainer*Gender_Male), data=data)
 
